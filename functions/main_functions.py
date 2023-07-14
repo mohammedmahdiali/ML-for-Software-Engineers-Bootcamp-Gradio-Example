@@ -86,7 +86,7 @@ def compile_model(optimizer, loss, metrics):
     except:
         return gr.update(value="Compiling Failed")
 
-def train_model(x, y, epochs, validation_split):
+def train_model(dataset, epochs, validation_split):
     try:
         model = tf.keras.models.load_model(get_model_path())
         
@@ -94,6 +94,10 @@ def train_model(x, y, epochs, validation_split):
         if validation_size == "5%": new_validation_size = 0.05
         elif validation_size == "10%": new_validation_size = 0.10
         else: new_validation_size = 0.20
+
+        dataset = pd.read_excel(dataset.name)
+        y = dataset["target"]
+        x = dataset.drop("target", axis=1)
         
         model.fit(x, y, epochs=epochs, validation_split=new_validation_size)
         return gr.update(value="Training ...")
