@@ -10,7 +10,7 @@ def create_model(input_shape):
 
     model = tf.keras.Sequential()
     model.add(tf.keras.Input(input_shape))
-    model.save("models/sequential")
+    model.save("../models/sequential")
 
     return gr.update(value=f"Model Created with (input_shape={input_shape})")
 
@@ -93,3 +93,16 @@ def train_model(x, y, epochs, validation_split):
         return gr.update(value="Training ...")
     except:
         return gr.update(value="Training Failed")
+
+def plot_history():
+    try:
+        model = tf.keras.models.load_model(get_model_path())
+        tmp_df = pd.DataFrame(model.history.history)
+        
+        fig, ax = plt.subplots()
+        for column in tmp_df.columns:
+            ax.plot(tmp_df.index, tmp_df[column], label=column)
+        ax.legend()
+        
+        return fig
+    except:pass
