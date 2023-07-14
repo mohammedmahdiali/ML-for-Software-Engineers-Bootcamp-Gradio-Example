@@ -14,7 +14,7 @@ with gr.Blocks() as brainable:
 
         with gr.Row():
             gr.Markdown("**Conv2D**:")
-            conv2d_count = gr.Label(conv2d_layer_count, container=False, show_label=False)
+            conv2d_count = gr.Label(conv2d_layers_count, container=False, show_label=False)
 
             gr.Markdown("**MaxPooling2D**:")
             max_pooling_count = gr.Label(max_pooling_layers_count, container=False, show_label=False)
@@ -109,13 +109,13 @@ with gr.Blocks() as brainable:
 
     plot_arch_btn.click(
         fn=plot_architecture,
-        input=None,
+        inputs=None,
         outputs=None
     )
 
     train_btn.click(
         fn=train_model,
-        inputs=[dataset, epochs, validation_split],
+        inputs=[dataset, epochs, validation_size],
         outputs=[action_status]
     )
 
