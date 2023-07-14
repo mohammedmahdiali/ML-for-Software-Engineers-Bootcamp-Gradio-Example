@@ -15,7 +15,7 @@ def create_model(input_shape):
     return gr.update(value=f"Model Created with (input_shape={input_shape})")
 
 def get_model_path():
-    return "models/sequential"
+    return "../models/sequential"
 
 def add_conv2d(filters, kernel_size, activation, padding):
     try:
@@ -56,7 +56,7 @@ def add_dense(size, activation):
 
 def plot_architecture():
     try:
-        img_path = "graphs/model_architecture.png"
+        img_path = "../graphs/model_architecture.png"
         model = tf.keras.models.load_model(get_model_path())
         plot_model(model, to_file=img_path)
         return gr.update(value="Saved Successfully")
