@@ -68,14 +68,14 @@ with gr.Blocks() as brainable:
                     epochs = gr.Slider(label="Epochs", interactive=True, maximum=2000)
                     validation_size = gr.Radio(choices=["5%", "10%", "20%", "30%"], label="Validation Size")
 
-            with gr.Row():
-                dataset = gr.File(label="Training Dataset")
-                train_btn = gr.Button(value="Train")
-                clear_btn = gr.Button(value="Clear Session")
-                plot_history_btn = gr.Button(value="Plot History")
+        with gr.Row():
+            dataset = gr.File(label="Training Dataset")
+            train_btn = gr.Button(value="Train")
+            clear_btn = gr.Button(value="Clear Session")
+            plot_history_btn = gr.Button(value="Plot History")
 
-            with gr.Row():
-                history_plot = gr.Plot(label="History")
+        with gr.Row():
+            history_plot = gr.Plot(label="History")
 
     create_model_btn.click(
         fn=create_model,
