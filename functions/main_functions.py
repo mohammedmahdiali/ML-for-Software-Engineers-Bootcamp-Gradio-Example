@@ -76,3 +76,20 @@ def update_layer_count(layer_type):
     }
 
     layers_dict[layer_type] += 1
+
+def compile_model(optimizer, loss, metrics):
+    try:
+        model = tf.keras.models.load_model(get_model_path())
+        if "," in metrics:metrics = metrics.split(",")
+        model.compile(optimizer=optimizer, loss=loss, metrics=metrics)
+        return gr.update(value="Compiled Successfully")
+    except:
+        return gr.update(value="Compiling Failed")
+
+def train_model(x, y, epochs, validation_split):
+    try:
+        model = tf.keras.models.load_model(get_model_path())
+        model.fit(x, y, epochs=epochs, validation_split=validation_split)
+        return gr.update(value="Training ...")
+    except:
+        return gr.update(value="Training Failed")
