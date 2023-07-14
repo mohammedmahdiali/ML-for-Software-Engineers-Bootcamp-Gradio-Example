@@ -77,4 +77,58 @@ with gr.Blocks() as brainable:
             with gr.Row():
                 history_plot = gr.Plot(label="History")
 
+    create_model_btn.click(
+        fn=create_model,
+        inputs=[input_shape],
+        outputs=[action_status]
+    )
+
+    add_conv2d_btn.click(
+        fn=add_conv2d,
+        inputs=[filters, kernel_size, activation, padding],
+        outputs=[action_status]
+    )
+
+    add_max_pooling_btn.click(
+        fn=add_max_pooling,
+        inputs=[kernel_size],
+        outputs=[action_status]
+    )
+
+    add_flatten_btn.click(
+        fn=add_flatten,
+        inputs=None,
+        outputs=[action_status]
+    )
+
+    add_dense_btn.click(
+        fn=add_dense,
+        inputs=[filters, activation],
+        outputs=[action_status]
+    )
+
+    plot_arch_btn.click(
+        fn=plot_architecture,
+        input=None,
+        outputs=None
+    )
+
+    train_btn.click(
+        fn=train_model,
+        inputs=[dataset, epochs, validation_split],
+        outputs=[action_status]
+    )
+
+    clear_btn.click(
+        fn=delete_model,
+        inputs=None,
+        outputs=None
+    )
+
+    plot_history_btn.click(
+        fn=plot_history,
+        inputs=None,
+        outputs=[history_plot]
+    )
+    
 brainable.launch()
