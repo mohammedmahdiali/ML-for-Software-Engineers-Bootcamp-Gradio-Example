@@ -89,7 +89,13 @@ def compile_model(optimizer, loss, metrics):
 def train_model(x, y, epochs, validation_split):
     try:
         model = tf.keras.models.load_model(get_model_path())
-        model.fit(x, y, epochs=epochs, validation_split=validation_split)
+        
+        new_validation_size = 0
+        if validation_size == "5%": new_validation_size = 0.05
+        elif validation_size == "10%": new_validation_size = 0.10
+        else: new_validation_size = 0.20
+        
+        model.fit(x, y, epochs=epochs, validation_split=new_validation_size)
         return gr.update(value="Training ...")
     except:
         return gr.update(value="Training Failed")
