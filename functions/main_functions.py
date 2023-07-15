@@ -55,10 +55,12 @@ def add_dense(size, activation):
     except:
         return gr.update(value="Adding Failed")
 
-def plot_architecture():
+def plot_architecture(optimizer, loss, metrics):
     try:
         img_path = "graphs/model_architecture.png"
         model = tf.keras.models.load_model(get_model_path())
+        if "," in metrics:metrics = metrics.split(",")
+        model.compile(optimizer=optimizer, loss=loss, metrics=metrics)
         plot_model(model, to_file=img_path)
         return gr.update(value="Saved Successfully")
     except:
