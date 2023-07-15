@@ -109,7 +109,7 @@ with gr.Blocks() as brainable:
 
     plot_arch_btn.click(
         fn=plot_architecture,
-        inputs=None,
+        inputs=[optimizer, loss, metrics],
         outputs=[action_status]
     )
 
