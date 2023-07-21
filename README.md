@@ -3,4 +3,7 @@ Gradio Example for ML for Software Engineers Bootcamp
 
 ### ToDo 📖:
   * Create Main App Structure : 🆗
-  * CNN Builder : 🆗
+  * Main Variables: 🆗
+  * Main Functions: 🆗
+  * Gradio Interface: 🆗
+  * Training: 🆗
