@@ -1,121 +1,111 @@
+import numpy as np
+import pandas as pd
+import ast
+import matplotlib.pyplot as plt
+
+from PIL import Image
+
+from sklearn.model_selection import train_test_split
+
 import tensorflow as tf
 from keras.utils import plot_model
-import ast
-import gradio as gr
-import numpy as np
-import shutil
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from settings import *
 
 def create_model(input_shape):
-    input_shape = ast.literal_eval(input_shape)
+    global model, conv2d_layers_count, dense_layers_count, max_pooling_layers_count
 
     model = tf.keras.Sequential()
-    model.add(tf.keras.Input(input_shape))
-    model.save("models/sequential")
+    input_shape = ast.literal_eval(input_shape)
+    model.add(tf.keras.Input(shape=input_shape))
 
-    return gr.update(value=f"Model Created with (input_shape={input_shape})")
+    conv2d_layers_count, dense_layers_count, max_pooling_layers_count = 0,0,0
 
-def get_model_path():
-    return "models/sequential"
+    return gr.update(value="Model Created")
 
 def add_conv2d(filters, kernel_size, activation, padding):
+    global model, conv2d_layers_count
     try:
-        kernel_size = map(int, kernel_size.split(","))
-        model = tf.keras.models.load_model(get_model_path())
+        kernel_size = tuple(map(int, kernel_size.split(",")))
         model.add(tf.keras.layers.Conv2D(filters, kernel_size=kernel_size, activation=activation, padding=padding))
-        update_layer_count("conv2d")
-        return gr.update(value="Added Successfully")
+        conv2d_layers_count += 1
+        return gr.update(value="Added Successfully"), gr.update(value=conv2d_layers_count)
     except:
         return gr.update(value="Adding Failed")
 
 def add_max_pooling(kernel_size):
+    global model, max_pooling_layers_count
     try:
-        kernel_size = map(int, kernel_size.split(","))
-        model = tf.keras.models.load_model(get_model_path())
+        kernel_size = tuple(map(int, kernel_size.split(",")))
         model.add(tf.keras.layers.MaxPooling2D(kernel_size))
-        update_layer_count("max_pooling")
-        return gr.update(value="Added Successfully")
+        max_pooling_layers_count += 1
+        return gr.update(value="Added Successfully"), gr.update(value=max_pooling_layers_count)
     except:
         return gr.update(value="Adding Failed")
 
 def add_flatten():
+    global model
     try:
-        model = tf.keras.models.load_model(get_model_path())
         model.add(tf.keras.layers.Flatten())
         return gr.update(value="Added Successfully")
     except:
         return gr.update(value="Adding Failed")
 
 def add_dense(size, activation):
+    global model, dense_layers_count
     try:
-        model = tf.keras.models.load_model(get_model_path())
         model.add(tf.keras.layers.Dense(size, activation=activation))
-        update_layer_count("dense")
-        return gr.update(value="Added Successfully")
+        dense_layers_count += 1
+        return gr.update(value="Added Successfully"), gr.update(value=dense_layers_count)
     except:
         return gr.update(value="Adding Failed")
 
-def plot_architecture(optimizer, loss, metrics):
+def plot_arch():
+    global model, img_path
     try:
-        img_path = "graphs/model_architecture.png"
-        model = tf.keras.models.load_model(get_model_path())
-        if "," in metrics:metrics = metrics.split(",")
-        model.compile(optimizer=optimizer, loss=loss, metrics=metrics)
         plot_model(model, to_file=img_path)
-        return gr.update(value="Saved Successfully")
+        img_pil = Image.open(img_path)
+        return gr.update(value="Saved"), img_pil
     except:
         return gr.update(value="Saving Failed")
 
-def delete_model():
-    shutil.rmtree(get_model_path())
+def train_model(dataset, optimizer, loss, metrics, epochs):
 
-def update_layer_count(layer_type):
-    
-    layers_dict = {
-        
-       'dense':dense_layers_count,
-       'conv2d': conv2d_layers_count,
-       'max_pooling': max_pooling_layers_count
-    }
+    dataset = pd.read_csv(dataset.name, encoding='utf-8')
+    x = np.array([tf.keras.preprocessing.image.img_to_array(tf.keras.preprocessing.image.load_img(path, target_size=(32, 32))) for path in dataset["path"]])
+    y = dataset["target"]
 
-    layers_dict[layer_type] += 1
+    x = x / 255.0
 
-def compile_model(optimizer, loss, metrics):
-    try:
-        model = tf.keras.models.load_model(get_model_path())
-        if "," in metrics:metrics = metrics.split(",")
-        model.compile(optimizer=optimizer, loss=loss, metrics=metrics)
-        return gr.update(value="Compiled Successfully")
-    except:
-        return gr.update(value="Compiling Failed")
+    x_train, x_val, y_train, y_val = train_test_split(x, y, test_size=0.2, random_state=42)
 
-def train_model(dataset, epochs, validation_split):
-    try:
-        model = tf.keras.models.load_model(get_model_path())
-        
-        new_validation_size = 0
-        if validation_size == "5%": new_validation_size = 0.05
-        elif validation_size == "10%": new_validation_size = 0.10
-        else: new_validation_size = 0.20
+    train_datagen = ImageDataGenerator(
+    rotation_range=20,
+    width_shift_range=0.2,
+    height_shift_range=0.2,
+    horizontal_flip=True
+    )
 
-        dataset = pd.read_excel(dataset.name)
-        y = dataset["target"]
-        x = dataset.drop("target", axis=1)
-        
-        model.fit(x, y, epochs=epochs, validation_split=new_validation_size)
-        return gr.update(value="Training ...")
-    except:
-        return gr.update(value="Training Failed")
+    val_datagen = ImageDataGenerator()
 
-def plot_history():
-    try:
-        model = tf.keras.models.load_model(get_model_path())
-        tmp_df = pd.DataFrame(model.history.history)
-        
-        fig, ax = plt.subplots()
-        for column in tmp_df.columns:
-            ax.plot(tmp_df.index, tmp_df[column], label=column)
-        ax.legend()
-        
-        return fig
-    except:pass
+    batch_size = 32
+
+    train_generator = train_datagen.flow(x_train, y_train, batch_size=batch_size)
+    val_generator = val_datagen.flow(x_val, y_val, batch_size=batch_size)
+
+    if "," in metrics:metrics = metrics.split(",")
+    else:pass
+
+    model.compile(optimizer=optimizer, loss=loss, metrics=metrics)
+
+    history = model.fit(train_generator, epochs=epochs, validation_data=val_generator)
+
+    val_loss, val_accuracy = model.evaluate(val_generator)
+
+    df = pd.DataFrame(history.history)
+    fig, ax = plt.subplots()
+    for column in df.columns:
+        ax.plot(df.index, df[column], label=column)
+    ax.legend()
+
+    return gr.update(value="Done"), str(f"val_loss={round(val_loss,2)} | val_accuracy={round(val_accuracy,2)}"), fig
