@@ -42,7 +42,7 @@ with gr.Blocks() as brainable:
                 with gr.Row():
                     gr.Markdown("Padding (same):")
                     padding = gr.Textbox(container=False, show_label=False)
-            
+
             with gr.Column():
                 create_model_btn = gr.Button(value="Create Your Model")
                 add_conv2d_btn = gr.Button(value="Add Conv2D")
@@ -66,16 +66,23 @@ with gr.Blocks() as brainable:
 
                 with gr.Row():
                     epochs = gr.Slider(label="Epochs", interactive=True, maximum=2000)
-                    validation_size = gr.Radio(choices=["5%", "10%", "20%", "30%"], label="Validation Size")
 
         with gr.Row():
             dataset = gr.File(label="Training Dataset")
             train_btn = gr.Button(value="Train")
-            clear_btn = gr.Button(value="Clear Session")
-            plot_history_btn = gr.Button(value="Plot History")
+
+            gr.Markdown("Evaluate:")
+            evaluate = gr.Label(container=False, show_label=False)
 
         with gr.Row():
-            history_plot = gr.Plot(label="History")
+            with gr.Column():
+                arch_plot = gr.Image(label="Neural Network Architecture").style(width=500, height=400)
+
+            with gr.Column():
+                history_plot= gr.Plot()
+
+            # with gr.Column():
+            #     arch_plot3 = gr.Image(label="Neural Network Architecture")
 
     create_model_btn.click(
         fn=create_model,
@@ -86,13 +93,13 @@ with gr.Blocks() as brainable:
     add_conv2d_btn.click(
         fn=add_conv2d,
         inputs=[filters, kernel_size, activation, padding],
-        outputs=[action_status]
+        outputs=[action_status, conv2d_count]
     )
 
     add_max_pooling_btn.click(
         fn=add_max_pooling,
         inputs=[kernel_size],
-        outputs=[action_status]
+        outputs=[action_status, max_pooling_count]
     )
 
     add_flatten_btn.click(
@@ -104,31 +111,20 @@ with gr.Blocks() as brainable:
     add_dense_btn.click(
         fn=add_dense,
         inputs=[filters, activation],
-        outputs=[action_status]
+        outputs=[action_status, dense_count]
     )
 
     plot_arch_btn.click(
-        fn=plot_architecture,
-        inputs=[optimizer, loss, metrics],
-        outputs=[action_status]
+        fn=plot_arch,
+        inputs=None,
+        outputs=[action_status, arch_plot]
     )
 
+    # dataset, optimizer, loss, metrics, validation_size, epochs
     train_btn.click(
         fn=train_model,
-        inputs=[dataset, epochs, validation_size],
-        outputs=[action_status]
+        inputs=[dataset, optimizer, loss, metrics, epochs],
+        outputs=[action_status, evaluate, history_plot]
     )
 
-    clear_btn.click(
-        fn=delete_model,
-        inputs=None,
-        outputs=None
-    )
-
-    plot_history_btn.click(
-        fn=plot_history,
-        inputs=None,
-        outputs=[history_plot]
-    )
-    
-brainable.launch()
+brainable.launch(debug=True)
